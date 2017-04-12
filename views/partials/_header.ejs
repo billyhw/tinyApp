@@ -1,6 +1,13 @@
 <h2> This is a Header </h2>
-<form method="POST" action = "/login" >
-  <label for="username">Login: </label>
-  <input id="username" type="text" name="username" placeholder= "username" style="width: 300px">
-  <input type="submit" value="Submit">
-</form>
+<% if (username !== undefined) { %>
+  <%= `Logged in as ${username}` %>
+  <form method="POST" action = "/logout" >
+    <button type="submit" value="Submit"> Logout </button>
+  </form>
+<% } else { %>
+  <form method="POST" action = "/login" >
+    <label for="username">Login: </label>
+    <input id="username" type="text" name="username" placeholder= "username" style="width: 300px">
+    <input type="submit" value="Submit">
+  </form>
+<% } %>

@@ -29,17 +29,21 @@ app.get("/hello", (req, res) => {
 })
 
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase };
+  let templateVars = {
+    urls: urlDatabase,
+    username: req.cookies["name"]
+    };
   res.render("urls_index", templateVars);
-})
+});
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  let templateVars = {
+    username: req.cookies["name"]
+  };
+  res.render("urls_new", templateVars);
 });
 
 app.post("/urls", (req, res) => {
-  //console.log(req.body); // debug statement to see POST params
-  //res.send("Ok");        // Respond with 'OK' (we will replace this)
   let shortURL = generateRandomString();
   urlDatabase[shortURL] = req.body.longURL;
   res.redirect(`http://localhost:8080/urls/${shortURL}`);
@@ -48,46 +52,39 @@ app.post("/urls", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
     shortURL: req.params.id,
-    urls: urlDatabase
+    urls: urlDatabase,
+    username: req.cookies["name"]
     };
   res.render("urls_show", templateVars);
 })
 
 app.get("/u/:shortURL", (req, res) => {
   let longURL = urlDatabase[req.params.shortURL];
-  //console.log(req);
   res.redirect(`http://${longURL}`);
 })
 
 // added post to delete url based on a shortURL
 app.post("/urls/:id/delete", (req, res) => {
-  //console.log(req.params);
   delete urlDatabase[req.params.id];
   res.redirect(`http://localhost:8080/urls`);
-  //delete urlDatabase[req.params.id];
-  //console.log(urlDatabase);
 })
 
 // added post to edit url based on a shortURL
 app.post("/urls/:id", (req, res) => {
-  //console.log(req.params);
   urlDatabase[req.params.id] = req.body.longURL;
   res.redirect(`http://localhost:8080/urls`);
-  //delete urlDatabase[req.params.id];
-  //console.log(urlDatabase);
 })
 
 // added post to edit url based on a shortURL
 app.post("/login", (req, res) => {
-  //console.log(req.body);
   let username = req.body.username;
   res.cookie('name', username);
-  //console.log(tmp);
   res.redirect("http://localhost:8080/");
-  //userBase[req.params.id] = req.params.id;
-  //res.redirect(`http://localhost:8080/urls`);
-  //delete urlDatabase[req.params.id];
-  //console.log(urlDatabase);
+})
+
+app.post("/logout", (req, res) => {
+  res.clearCookie('name');
+  res.redirect("http://localhost:8080/")
 })
 
 function generateRandomString() {
