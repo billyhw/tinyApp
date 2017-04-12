@@ -54,7 +54,16 @@ app.get("/urls/:id", (req, res) => {
 app.get("/u/:shortURL", (req, res) => {
   let longURL = urlDatabase[req.params.shortURL];
   //console.log(req);
-  res.redirect(longURL)
+  res.redirect(`http://${longURL}`);
+})
+
+// added post to delete url based on a shortURL
+app.post("/urls/:id/delete", (req, res) => {
+  //console.log(req.params);
+  delete urlDatabase[req.params.id];
+  res.redirect(`http://localhost:8080/urls`);
+  //delete urlDatabase[req.params.id];
+  //console.log(urlDatabase);
 })
 
 function generateRandomString() {
