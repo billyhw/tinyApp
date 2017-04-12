@@ -4,6 +4,8 @@ var PORT = process.env.PORT || 8080;
 app.set("view engine", "ejs");
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
+const cookieParser = require('cookie-parser')
+app.use(cookieParser());
 
 var urlDatabase = {
   'b2xVn2': 'http://www.lighthouselabs.ca',
@@ -77,9 +79,11 @@ app.post("/urls/:id", (req, res) => {
 
 // added post to edit url based on a shortURL
 app.post("/login", (req, res) => {
-  console.log(req.body);
+  //console.log(req.body);
   let username = req.body.username;
-  res.end(`hello ${username}`);
+  res.cookie('name', username);
+  //console.log(tmp);
+  res.redirect("http://localhost:8080/");
   //userBase[req.params.id] = req.params.id;
   //res.redirect(`http://localhost:8080/urls`);
   //delete urlDatabase[req.params.id];
