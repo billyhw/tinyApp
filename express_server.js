@@ -23,7 +23,7 @@ app.get("/urls.json", (req, res) => {
 })
 
 app.get("/hello", (req, res) => {
-  res.end("<html><body>Hello <b>World</b></body></html>\n");
+  res.end("<html><body> Hello <b>World</b></body></html>\n");
 })
 
 app.get("/urls", (req, res) => {
@@ -66,12 +66,19 @@ app.post("/urls/:id/delete", (req, res) => {
   //console.log(urlDatabase);
 })
 
+// added post to edit url based on a shortURL
+app.post("/urls/:id", (req, res) => {
+  //console.log(req.params);
+  urlDatabase[req.params.id] = req.body.longURL;
+  res.redirect(`http://localhost:8080/urls`);
+  //delete urlDatabase[req.params.id];
+  //console.log(urlDatabase);
+})
+
 function generateRandomString() {
   var text = "";
   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
   for( var i=0; i < 6; i++ )
     text += possible.charAt(Math.floor(Math.random() * possible.length));
-
   return text;
 }
