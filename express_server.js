@@ -75,6 +75,17 @@ app.post("/urls/:id", (req, res) => {
   //console.log(urlDatabase);
 })
 
+// added post to edit url based on a shortURL
+app.post("/login", (req, res) => {
+  console.log(req.body);
+  let username = req.body.username;
+  res.end(`hello ${username}`);
+  //userBase[req.params.id] = req.params.id;
+  //res.redirect(`http://localhost:8080/urls`);
+  //delete urlDatabase[req.params.id];
+  //console.log(urlDatabase);
+})
+
 function generateRandomString() {
   var text = "";
   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
