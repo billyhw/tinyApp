@@ -53,7 +53,11 @@ app.get("/urls/new", (req, res) => {
   let templateVars = {
     user: users[req.cookies["name"]]
   };
-  res.render("urls_new", templateVars);
+  if (templateVars.user === undefined) {
+    res.redirect("http://localhost:8080/login");
+  } else {
+    res.render("urls_new", templateVars);
+  }
 });
 
 app.post("/urls", (req, res) => {
