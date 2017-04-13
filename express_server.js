@@ -87,6 +87,13 @@ app.post("/logout", (req, res) => {
   res.redirect("http://localhost:8080/")
 })
 
+app.get("/register", (req, res) => {
+  let templateVars = {
+    username: req.cookies["name"]
+  };
+  res.render("urls_register", templateVars);
+});
+
 function generateRandomString() {
   var text = "";
   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
