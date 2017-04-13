@@ -107,6 +107,17 @@ app.get("/register", (req, res) => {
   res.render("urls_register", templateVars);
 });
 
+app.post("/register", (req, res) => {
+  let user_id = generateRandomString();
+  users[user_id] = {
+    id: user_id,
+    email: req.body.email,
+    password: req.body.password
+  }
+  res.cookie('name',user_id)
+  res.redirect("http://localhost:8080/")
+});
+
 function generateRandomString() {
   var text = "";
   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
