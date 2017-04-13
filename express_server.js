@@ -4,7 +4,7 @@ var PORT = process.env.PORT || 8080;
 app.set("view engine", "ejs");
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
-const cookieParser = require('cookie-parser')
+const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
 var urlDatabase = {
@@ -44,14 +44,14 @@ app.get("/hello", (req, res) => {
 app.get("/urls", (req, res) => {
   let templateVars = {
     urls: urlDatabase,
-    username: req.cookies["name"]
+    user: users[req.cookies["name"]]
     };
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
   let templateVars = {
-    username: req.cookies["name"]
+    user: users[req.cookies["name"]]
   };
   res.render("urls_new", templateVars);
 });
@@ -66,7 +66,7 @@ app.get("/urls/:id", (req, res) => {
   let templateVars = {
     shortURL: req.params.id,
     urls: urlDatabase,
-    username: req.cookies["name"]
+    user: users[req.cookies["name"]]
     };
   res.render("urls_show", templateVars);
 })
@@ -102,7 +102,7 @@ app.post("/logout", (req, res) => {
 
 app.get("/register", (req, res) => {
   let templateVars = {
-    username: req.cookies["name"]
+    user: users[req.cookies["name"]]
   };
   res.render("urls_register", templateVars);
 });
