@@ -5,10 +5,8 @@
     <button type="submit" value="Submit"> Logout </button>
   </form>
 <% } else { %>
-  <form method="POST" action = "/login" >
-    <label for="username">Login: </label>
-    <input id="username" type="text" name="username" placeholder= "username" style="width: 300px">
-    <input type="submit" value="Submit">
+  <form method="GET" action = "/login" >
+    <button type="submit" action="Submit"> Login </button>
   </form>
 <% } %>
 <h3> Do not have an account? Register <a href = "http://localhost:8080/register"> here</a>. </h3>

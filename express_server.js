@@ -88,12 +88,32 @@ app.post("/urls/:id", (req, res) => {
   res.redirect(`http://localhost:8080/urls`);
 })
 
+app.get("/login", (req, res) => {
+  let templateVars = {
+    user: users[req.cookies["name"]]
+  };
+  res.render("urls_login", templateVars);
+});
+
 // added post to edit url based on a shortURL
 app.post("/login", (req, res) => {
-  let username = req.body.username;
-  res.cookie('name', username);
-  res.redirect("http://localhost:8080/");
-})
+  let email = req.body.email;
+  let objKeys = Object.keys(users);
+  let index = objKeys.map(function(x) { return users[x].email; }).indexOf(req.body.email);
+  if (index === -1) {
+    res.status(403);
+    res.send(`${res.statusCode}: User email does not exist.`);
+  }
+  else {
+    if (users[objKeys[index]].password !== req.body.password) {
+      res.status(403);
+      res.send(`${res.statusCode}: pasword does not match.`);
+    } else {
+      res.cookie('name', users[objKeys[index]].id);
+      res.redirect('http://localhost:8080/');
+    }
+  }
+});
 
 app.post("/logout", (req, res) => {
   res.clearCookie('name');
