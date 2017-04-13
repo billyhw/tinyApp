@@ -108,14 +108,22 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  let user_id = generateRandomString();
-  users[user_id] = {
-    id: user_id,
-    email: req.body.email,
-    password: req.body.password
+  if (req.body.email === '' || req.body.password === '') {
+    res.status(400);
+    res.send(`${res.statusCode}: Email and/or password cannot be empty.`);
+  } else if (Object.keys(users).map(function(x) { return users[x].email; }).indexOf(req.body.email) !== -1) {
+    res.status(400);
+    res.send(`${res.statusCode}: Email already exist.`);
+  } else {
+    let user_id = generateRandomString();
+    users[user_id] = {
+      id: user_id,
+      email: req.body.email,
+      password: req.body.password
+    }
+    res.cookie('name',user_id);
+    res.redirect("http://localhost:8080/");
   }
-  res.cookie('name',user_id)
-  res.redirect("http://localhost:8080/")
 });
 
 function generateRandomString() {
