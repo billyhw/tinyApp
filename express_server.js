@@ -58,73 +58,169 @@ function urlsForUser(id) {
   return subDatabase;
 }
 
+// At root directory
 app.get('/', (req, res) => {
-  res.redirect("http://localhost:8080/urls/new");
+  // if user is not logged in, redirect to login page
+  console.log(req.session)
+  if (req.session.user_id === undefined) {
+    res.redirect("http://localhost:8080/login");
+  }
+  // if user is logged in, go to the index page
+  else {
+    res.redirect("http://localhost:8080/urls");
+  }
 });
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-})
+// app.get("/urls.json", (req, res) => {
+//   res.json(urlDatabase);
+// })
 
-app.get("/hello", (req, res) => {
-  res.end("<html><body> Hello <b>World</b></body></html>\n");
-})
+// app.get("/hello", (req, res) => {
+//   res.end("<html><body> Hello <b>World</b></body></html>\n");
+// })
 
 app.get("/urls", (req, res) => {
-  let subDatabase = urlsForUser(req.session.user_id);
-  let templateVars = {
-    urls: subDatabase,
-    user: req.session.user_id
-    };
-  res.render("urls_index", templateVars);
+  // if not logged in, return status code 401 response and link to /login
+  if (req.session.user_id === undefined) {
+    res.status(401);
+    res.send("<html><body> Error: You haven't logged in yet. <br> Please login <a href='http://localhost:8080/login'>here</a></body></html>\n");
+  }
+  // if logged in, return status code 200 and a page with urls,
+  // edit button, delete buttons, link to create new short url.
+  // plus <stretch> date created, number of visits, number of unique visitors </stretch>
+  else {
+    res.status(200)
+    let subDatabase = urlsForUser(req.session.user_id);
+    let templateVars = {
+      urls: subDatabase,
+      user: req.session.user_id,
+      users: users
+      };
+      console.log(users)
+    res.render("urls_index", templateVars);
+  }
 });
 
 app.get("/urls/new", (req, res) => {
   let templateVars = {
-    user: req.session.user_id
+    user: req.session.user_id,
+    users: users
   };
-  if (templateVars.user === undefined) {
-    res.redirect("http://localhost:8080/login");
-  } else {
+  // if not logged in, return status 401 and a link to login page
+  if (req.session.user_id === undefined) {
+    res.status(401);
+    res.send("<html><body> Error: You haven't logged in yet. <br> Please login <a href='http://localhost:8080/login'>here</a></body></html>\n");
+  }
+  // if logged in, return status 200 and open add new link page.
+  else {
+    res.status(200);
     res.render("urls_new", templateVars);
   }
 });
 
-app.post("/urls/new", (req, res) => {
-  let shortURL = generateRandomString();
-  urlDatabase[shortURL] = {};
-  urlDatabase[shortURL].url = req.body.longURL;
-  urlDatabase[shortURL].userID = req.session.user_id;
-  //res.redirect(`http://localhost:8080/urls/${shortURL}`);
-  res.redirect(`http://localhost:8080/urls/`);
+app.post("/urls", (req, res) => {
+  // if user is not logged in
+  if (req.session.user_id === undefined) {
+    res.status(401);
+    res.send("<html><body> Error: You haven't logged in yet. <br> Please login <a href='http://localhost:8080/login'>here</a></body></html>\n");
+  } else {
+    // if user is logged in, generate shortURL, add URL,
+    // and make user the owner
+    let shortURL = generateRandomString();
+    urlDatabase[shortURL] = {};
+    urlDatabase[shortURL].url = req.body.longURL;
+    urlDatabase[shortURL].userID = req.session.user_id;
+    res.redirect(`http://localhost:8080/urls/${shortURL}`);
+  }
 });
 
+app.post("/urls/:id", (req, res) => {
+  shortURLList = Object.keys(urlDatabase);
+  // if short URL as provided in :id does not exit,
+  // return 404 and error message
+  if (shortURLList.indexOf(req.params.id) === -1) {
+    res.status(404);
+    res.send(`${res.statusCode}: short URL does not exist.`);
+  }
+  // if not logged in, return 401 and error message with login link
+  else if (req.session.user_id === undefined) {
+    res.status(401);
+    res.send("<html><body> Error: You haven't logged in yet. <br> Please login <a href='http://localhost:8080/login'>here</a></body></html>\n");
+  }
+  // if user does not own the queried short URL,
+  // return 403 and error message
+  else if (req.session.user_id !== urlDatabase[req.params.id].userID) {
+    res.status(403);
+    res.send(`${res.statusCode}: you do not have access to this short URL.`)
+  }
+  // if all is well, return 200 and the update form
+  else {
+    urlDatabase[req.params.id].url = req.body.longURL;
+    res.redirect(`http://localhost:8080/urls/${req.params.id}`);
+  }
+})
+
 app.get("/urls/:id", (req, res) => {
-  let templateVars = {
-    shortURL: req.params.id,
-    urls: urlDatabase,
-    user: req.session.user_id
-    };
-  res.render("urls_show", templateVars);
+  shortURLList = Object.keys(urlDatabase);
+  // if short URL as provided in :id does not exit,
+  // return 404 and error message
+  if (shortURLList.indexOf(req.params.id) === -1) {
+    res.status(404);
+    res.send(`${res.statusCode}: short URL does not exist.`);
+  }
+  // if not logged in, return 401 and error message with login link
+  else if (req.session.user_id === undefined) {
+    res.status(401);
+    res.send("<html><body> Error: You haven't logged in yet. <br> Please login <a href='http://localhost:8080/login'>here</a></body></html>\n");
+  }
+  // if user does not own the queried short URL,
+  // return 403 and error message
+  else if (req.session.user_id !== urlDatabase[req.params.id].userID) {
+    res.status(403);
+    res.send(`${res.statusCode}: you do not have access to this short URL.`)
+  }
+  // if all is well, return 200 and the update form
+  else {
+    let templateVars = {
+      shortURL: req.params.id,
+      urls: urlDatabase,
+      user: req.session.user_id,
+      users: users
+      };
+    res.render("urls_show", templateVars);
+  }
 })
 
+// redirect to the short URL link
 app.get("/u/:shortURL", (req, res) => {
-  let longURL = urlDatabase[req.params.shortURL].url;
-  res.redirect(`http://${longURL}`);
+  // if short URL does not exist, return 404 and error message
+  if (urlDatabase[req.params.shortURL] === undefined) {
+    res.status(404);
+    res.send(`${res.statusCode}: short URL does not exist.`);
+  }
+  // if short URL exists, redirect to the long URL
+  else {
+    let longURL = urlDatabase[req.params.shortURL].url;
+    res.redirect(`http://${longURL}`);
+  }
 })
 
+// delete a url
 app.delete("/urls/:id", (req, res) => {
+  // only url owner can delete
   if (urlDatabase[req.params.id].userID === req.session.user_id) {
     delete urlDatabase[req.params.id];
   }
   res.redirect(`http://localhost:8080/urls`);
 })
 
+// update a url
 app.put("/urls/:id", (req, res) => {
+  // only url owner can update
   if (urlDatabase[req.params.id].userID === req.session.user_id) {
     urlDatabase[req.params.id].url = req.body.longURL;
   }
@@ -132,53 +228,77 @@ app.put("/urls/:id", (req, res) => {
 })
 
 app.get("/login", (req, res) => {
-
-  let templateVars = {
-    user: users[req.session.user_id]
-  };
-  res.render("urls_login", templateVars);
+  // if not logged in, return 200 and move to login page
+  if (req.session.user_id === undefined) {
+    res.status(200);
+    let templateVars = {
+      user: users[req.session.user_id],
+      users: users
+    };
+    res.render("urls_login", templateVars);
+  }
+  // if logged in, return to root
+  else {
+    res.redirect("http://localhost:8080/");
+  }
 });
 
-// added post to edit url based on a shortURL
 app.post("/login", (req, res) => {
   let email = req.body.email;
   let objKeys = Object.keys(users);
   let index = objKeys.map(function(x) { return users[x].email; }).indexOf(req.body.email);
+  // if email does not exist, return 401
   if (index === -1) {
-    res.status(403);
+    res.status(401);
     res.send(`${res.statusCode}: User email does not exist.`);
   }
   else {
+    // if password does not match, return 401
+    // note the password must be decrypted
     if (bcrypt.compareSync(users[objKeys[index]].hashed_password, req.body.password)) {
-      res.status(403);
+      res.status(401);
       res.send(`${res.statusCode}: password does not match.`);
     } else {
+      // if login successful, create cookie and move to root
       req.session.user_id = users[objKeys[index]].id;
       res.redirect('http://localhost:8080/');
     }
   }
 });
 
+// logout
 app.post("/logout", (req, res) => {
+  // clear the cookie
   req.session = null;
   res.redirect("http://localhost:8080/")
 })
 
 app.get("/register", (req, res) => {
-  let templateVars = {
-    user: users[req.session.user_id]
-  };
-  res.render("urls_register", templateVars);
-});
+  // if not logged in, return 200 and move to register page
+  if (req.session.user_id === undefined) {
+    res.status(200);
+    let templateVars = {
+      user: users[req.session.user_id],
+      users: users
+    };
+    res.render("urls_register", templateVars);
+  } else {
+    // if already logged in, move to root
+    res.redirect("http://localhost:8080/");
+  }
+})
 
 app.post("/register", (req, res) => {
+  // if email or password not provided, return 400 and error message
   if (req.body.email === '' || req.body.password === '') {
     res.status(400);
     res.send(`${res.statusCode}: Email and/or password cannot be empty.`);
   } else if (Object.keys(users).map(function(x) { return users[x].email; }).indexOf(req.body.email) !== -1) {
+    // if email already exist, return 400 and error message
     res.status(400);
     res.send(`${res.statusCode}: Email already exist.`);
   } else {
+    // if register successful, create user and cookie
     let user_id = generateRandomString();
     users[user_id] = {
       id: user_id,
@@ -190,6 +310,7 @@ app.post("/register", (req, res) => {
   }
 });
 
+// function to generate random string for user ID and short URL
 function generateRandomString() {
   var text = "";
   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";

@@ -5,13 +5,16 @@
   </head>
   <body>
     <% include partials/_header %>
-      <h3> <%= `Update ${urls[shortURL].url}` %> </h3>
+      <h3> <%= `Update link for short URL: ${shortURL}` %> </h3>
         <form method="POST" action = <%= `/urls/${shortURL}?_method=PUT` %>>
-          <label for="longURL">Updated URL:</label>
-          <input id="longURL" type="text" name="longURL" style="width: 300px">
-          <input type="submit" value="Submit">
+          <label for="longURL"><%= `Update ${urls[shortURL].url}:` %></label>
+          <br>
+          <input id="longURL" type="text" name="longURL" style="width: 200px">
+          <button type="submit" value="Submit"> Update </button>
         </form>
-      <br>
+        <form method="POST" action = <%= `/urls/${shortURL}?_method=DELETE` %>>
+          <button type="submit" value="Submit"> Delete </button>
+        </form>
       <a href="http://localhost:8080/urls/new"> Add new URL here </a>
     </body>
 </html>

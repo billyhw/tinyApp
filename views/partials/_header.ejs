@@ -1,14 +1,12 @@
 <h2> TinyURL </h2>
 <% if (user !== undefined) { %>
 <form method="POST" action = "/logout" >
-  <%= `Logged in as ${user}` %>
+  <%= `Logged in as ${users[user].email}` %>
   <button type="submit" value="Submit"> Logout </button>
 </form>
 <% } else { %>
-<form method="GET" action = "/login" >
-  <button type="submit" action="Submit"> Login </button>
-</form>
 <h4>
+  Please login <a href = "http://localhost:8080/login">here</a>.
   Do not have an account? Register <a href = "http://localhost:8080/register"> here</a>.
 </h4>
 <% } %>
