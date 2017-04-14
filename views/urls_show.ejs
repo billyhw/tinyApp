@@ -5,7 +5,7 @@
   </head>
   <body>
     <% include partials/_header %>
-      <h3> <%= `Update ${urls[shortURL]}` %> </h3>
+      <h3> <%= `Update ${urls[shortURL].url}` %> </h3>
         <form method="POST" action = <%= `/urls/${shortURL}` %>>
           <label for="longURL">Updated URL:</label>
           <input id="longURL" type="text" name="longURL" style="width: 300px">

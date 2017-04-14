@@ -8,8 +8,14 @@ const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
 var urlDatabase = {
-  'b2xVn2': 'http://www.lighthouselabs.ca',
-  '9sm5xK': 'http://www.google.com'
+  'b2xVn2': {
+      url: 'www.lighthouselabs.ca',
+      userID: 'userRandomID'
+    },
+  '9sm5xK': {
+    url: 'www.google.com',
+    userID: 'user2RandomID'
+  }
 };
 
 const users = {
@@ -23,6 +29,16 @@ const users = {
     email: "user2@examle.com",
     password: "dishwasher-funk"
   }
+}
+
+function urlsForUser(id) {
+  subDatabase = {};
+  for (let key in urlDatabase) {
+    if (urlDatabase[key].userID === id) {
+      subDatabase[key] = urlDatabase[key];
+    }
+  }
+  return subDatabase;
 }
 
 app.get('/', (req, res) => {
@@ -42,8 +58,9 @@ app.get("/hello", (req, res) => {
 })
 
 app.get("/urls", (req, res) => {
+  let subDatabase = urlsForUser(req.cookies["name"]);
   let templateVars = {
-    urls: urlDatabase,
+    urls: subDatabase,
     user: users[req.cookies["name"]]
     };
   res.render("urls_index", templateVars);
@@ -60,9 +77,11 @@ app.get("/urls/new", (req, res) => {
   }
 });
 
-app.post("/urls", (req, res) => {
+app.post("/urls/new", (req, res) => {
   let shortURL = generateRandomString();
-  urlDatabase[shortURL] = req.body.longURL;
+  urlDatabase[shortURL] = {};
+  urlDatabase[shortURL].url = req.body.longURL;
+  urlDatabase[shortURL].userID = req.cookies["name"];
   res.redirect(`http://localhost:8080/urls/${shortURL}`);
 });
 
@@ -76,19 +95,23 @@ app.get("/urls/:id", (req, res) => {
 })
 
 app.get("/u/:shortURL", (req, res) => {
-  let longURL = urlDatabase[req.params.shortURL];
+  let longURL = urlDatabase[req.params.shortURL].url;
   res.redirect(`http://${longURL}`);
 })
 
 // added post to delete url based on a shortURL
 app.post("/urls/:id/delete", (req, res) => {
-  delete urlDatabase[req.params.id];
+  if (urlDatabase[req.params.id].userID === req.cookies["name"]) {
+    delete urlDatabase[req.params.id];
+  }
   res.redirect(`http://localhost:8080/urls`);
 })
 
 // added post to edit url based on a shortURL
 app.post("/urls/:id", (req, res) => {
-  urlDatabase[req.params.id] = req.body.longURL;
+  if (urlDatabase[req.params.id].userID === req.cookies["name"]) {
+    urlDatabase[req.params.id].url = req.body.longURL;
+  }
   res.redirect(`http://localhost:8080/urls`);
 })
 
