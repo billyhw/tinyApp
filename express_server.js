@@ -6,7 +6,6 @@ var PORT = process.env.PORT || 8080;
 var methodOverride = require('method-override')
 app.use(methodOverride('_method'))
 
-// console.log(app.use)
 
 app.set("view engine", "ejs");
 const bodyParser = require("body-parser");
@@ -76,17 +75,17 @@ app.get("/hello", (req, res) => {
 })
 
 app.get("/urls", (req, res) => {
-  let subDatabase = urlsForUser(req.cookies["name"]);
+  let subDatabase = urlsForUser(req.session.user_id);
   let templateVars = {
     urls: subDatabase,
-    user: users[req.cookies["name"]]
+    user: req.session.user_id
     };
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
   let templateVars = {
-    user: users[req.cookies["name"]]
+    user: req.session.user_id
   };
   if (templateVars.user === undefined) {
     res.redirect("http://localhost:8080/login");
@@ -99,7 +98,7 @@ app.post("/urls/new", (req, res) => {
   let shortURL = generateRandomString();
   urlDatabase[shortURL] = {};
   urlDatabase[shortURL].url = req.body.longURL;
-  urlDatabase[shortURL].userID = req.cookies["name"];
+  urlDatabase[shortURL].userID = req.session.user_id;
   res.redirect(`http://localhost:8080/urls/${shortURL}`);
 });
 
@@ -107,7 +106,7 @@ app.get("/urls/:id", (req, res) => {
   let templateVars = {
     shortURL: req.params.id,
     urls: urlDatabase,
-    user: users[req.cookies["name"]]
+    user: req.session.user_id
     };
   res.render("urls_show", templateVars);
 })
@@ -117,39 +116,24 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(`http://${longURL}`);
 })
 
-// added post to delete url based on a shortURL
-// app.post("/urls/:id/delete", (req, res) => {
-//   if (urlDatabase[req.params.id].userID === req.cookies["name"]) {
-//     delete urlDatabase[req.params.id];
-//   }
-//   res.redirect(`http://localhost:8080/urls`);
-// })
-
 app.delete("/urls/:id", (req, res) => {
-  if (urlDatabase[req.params.id].userID === req.cookies["name"]) {
+  if (urlDatabase[req.params.id].userID === req.session.user_id) {
     delete urlDatabase[req.params.id];
   }
   res.redirect(`http://localhost:8080/urls`);
 })
 
-// added post to edit url based on a shortURL
-// app.post("/urls/:id", (req, res) => {
-//   if (urlDatabase[req.params.id].userID === req.cookies["name"]) {
-//     urlDatabase[req.params.id].url = req.body.longURL;
-//   }
-//   res.redirect(`http://localhost:8080/urls`);
-// })
-
 app.put("/urls/:id", (req, res) => {
-  if (urlDatabase[req.params.id].userID === req.cookies["name"]) {
+  if (urlDatabase[req.params.id].userID === req.session.user_id) {
     urlDatabase[req.params.id].url = req.body.longURL;
   }
   res.redirect(`http://localhost:8080/urls`);
 })
 
 app.get("/login", (req, res) => {
+
   let templateVars = {
-    user: users[req.cookies["name"]]
+    user: users[req.session.user_id]
   };
   res.render("urls_login", templateVars);
 });
@@ -166,22 +150,22 @@ app.post("/login", (req, res) => {
   else {
     if (bcrypt.compareSync(users[objKeys[index]].hashed_password, req.body.password)) {
       res.status(403);
-      res.send(`${res.statusCode}: pasword does not match.`);
+      res.send(`${res.statusCode}: password does not match.`);
     } else {
-      res.cookie('name', users[objKeys[index]].id);
+      req.session.user_id = users[objKeys[index]].id;
       res.redirect('http://localhost:8080/');
     }
   }
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie('name');
+  req.session = null;
   res.redirect("http://localhost:8080/")
 })
 
 app.get("/register", (req, res) => {
   let templateVars = {
-    user: users[req.cookies["name"]]
+    user: users[req.session.user_id]
   };
   res.render("urls_register", templateVars);
 });
@@ -200,7 +184,7 @@ app.post("/register", (req, res) => {
       email: req.body.email,
       hashed_password: bcrypt.hashSync(req.body.password,10)
     }
-    res.cookie('name',user_id);
+    req.session.user_id = user_id;
     res.redirect("http://localhost:8080/");
   }
 });

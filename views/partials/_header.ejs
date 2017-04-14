@@ -1,7 +1,7 @@
 <h2> TinyURL </h2>
 <% if (user !== undefined) { %>
 <form method="POST" action = "/logout" >
-  <%= `Logged in as ${user.id}` %>
+  <%= `Logged in as ${user}` %>
   <button type="submit" value="Submit"> Logout </button>
 </form>
 <% } else { %>
