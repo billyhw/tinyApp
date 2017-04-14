@@ -59,7 +59,7 @@ function urlsForUser(id) {
 }
 
 app.get('/', (req, res) => {
-  res.end("Hello!");
+  res.redirect("http://localhost:8080/urls/new");
 });
 
 app.listen(PORT, () => {
@@ -99,7 +99,8 @@ app.post("/urls/new", (req, res) => {
   urlDatabase[shortURL] = {};
   urlDatabase[shortURL].url = req.body.longURL;
   urlDatabase[shortURL].userID = req.session.user_id;
-  res.redirect(`http://localhost:8080/urls/${shortURL}`);
+  //res.redirect(`http://localhost:8080/urls/${shortURL}`);
+  res.redirect(`http://localhost:8080/urls/`);
 });
 
 app.get("/urls/:id", (req, res) => {

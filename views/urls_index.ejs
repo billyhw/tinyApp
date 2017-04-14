@@ -9,8 +9,8 @@
         <% for (var url in urls) { %>
           <li>
             <form method="POST" action = <%= `/urls/${url}?_method=DELETE` %>>
-              <%= url %> - <%= urls[url].url %>
-              <a href = <%= `http://localhost:8080/urls/${url}` %>>Edit</a>
+              <a href=<%= `http://localhost:8080/u/${url}` %> target="_blank"><%= url %></a> - <%= urls[url].url %>
+              <a href=<%= `http://localhost:8080/urls/${url}` %>>Edit</a>
               <button type = "submit" value = "Submit"> Delete </button>
             </form>
           </li>
