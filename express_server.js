@@ -1,12 +1,29 @@
 var express = require("express");
 var app = express();
 var PORT = process.env.PORT || 8080;
+
+// override with POST having ?_method=DELETE
+var methodOverride = require('method-override')
+app.use(methodOverride('_method'))
+
+// console.log(app.use)
+
 app.set("view engine", "ejs");
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 const bcrypt = require('bcrypt');
+var cookieSession = require('cookie-session')
+
+
+app.use(cookieSession({
+  name: 'session',
+  keys: ['key1','key2'],
+
+  // Cookie Options
+  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}))
 
 var urlDatabase = {
   'b2xVn2': {
@@ -101,7 +118,14 @@ app.get("/u/:shortURL", (req, res) => {
 })
 
 // added post to delete url based on a shortURL
-app.post("/urls/:id/delete", (req, res) => {
+// app.post("/urls/:id/delete", (req, res) => {
+//   if (urlDatabase[req.params.id].userID === req.cookies["name"]) {
+//     delete urlDatabase[req.params.id];
+//   }
+//   res.redirect(`http://localhost:8080/urls`);
+// })
+
+app.delete("/urls/:id", (req, res) => {
   if (urlDatabase[req.params.id].userID === req.cookies["name"]) {
     delete urlDatabase[req.params.id];
   }
@@ -109,7 +133,14 @@ app.post("/urls/:id/delete", (req, res) => {
 })
 
 // added post to edit url based on a shortURL
-app.post("/urls/:id", (req, res) => {
+// app.post("/urls/:id", (req, res) => {
+//   if (urlDatabase[req.params.id].userID === req.cookies["name"]) {
+//     urlDatabase[req.params.id].url = req.body.longURL;
+//   }
+//   res.redirect(`http://localhost:8080/urls`);
+// })
+
+app.put("/urls/:id", (req, res) => {
   if (urlDatabase[req.params.id].userID === req.cookies["name"]) {
     urlDatabase[req.params.id].url = req.body.longURL;
   }
