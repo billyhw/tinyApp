@@ -6,6 +6,7 @@ const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
+const bcrypt = require('bcrypt');
 
 var urlDatabase = {
   'b2xVn2': {
@@ -22,12 +23,12 @@ const users = {
   "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur"
+    hashed_password: bcrypt.hashSync("purple-monkey-dinosaur",10)
   },
   "user2RandomID": {
     id: "user2RandomID",
     email: "user2@examle.com",
-    password: "dishwasher-funk"
+    hashed_password: bcrypt.hashSync("dishwasher-funk",10)
   }
 }
 
@@ -132,7 +133,7 @@ app.post("/login", (req, res) => {
     res.send(`${res.statusCode}: User email does not exist.`);
   }
   else {
-    if (users[objKeys[index]].password !== req.body.password) {
+    if (bcrypt.compareSync(users[objKeys[index]].hashed_password, req.body.password)) {
       res.status(403);
       res.send(`${res.statusCode}: pasword does not match.`);
     } else {
@@ -166,7 +167,7 @@ app.post("/register", (req, res) => {
     users[user_id] = {
       id: user_id,
       email: req.body.email,
-      password: req.body.password
+      hashed_password: bcrypt.hashSync(req.body.password,10)
     }
     res.cookie('name',user_id);
     res.redirect("http://localhost:8080/");
