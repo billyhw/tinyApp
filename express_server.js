@@ -1,20 +1,21 @@
-var express = require("express");
-var app = express();
-var PORT = process.env.PORT || 8080;
+// required modules
+const express = require("express");
+const app = express();
+const PORT = process.env.PORT || 8080;
 
-// override with POST having ?_method=DELETE
-var methodOverride = require('method-override')
+const methodOverride = require('method-override')
 app.use(methodOverride('_method'))
 
-
 app.set("view engine", "ejs");
+
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
+
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
-const bcrypt = require('bcrypt');
-var cookieSession = require('cookie-session')
 
+const bcrypt = require('bcrypt');
+const cookieSession = require('cookie-session')
 
 app.use(cookieSession({
   name: 'session',
@@ -24,7 +25,8 @@ app.use(cookieSession({
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }))
 
-var urlDatabase = {
+// hardcoded database
+let urlDatabase = {
   'b2xVn2': {
       url: 'www.lighthouselabs.ca',
       userID: 'userRandomID'
@@ -35,6 +37,7 @@ var urlDatabase = {
   }
 };
 
+// hardcoded user base
 const users = {
   "userRandomID": {
     id: "userRandomID",
@@ -48,8 +51,9 @@ const users = {
   }
 }
 
+// function to find user-specific short urls
 function urlsForUser(id) {
-  subDatabase = {};
+  let subDatabase = {};
   for (let key in urlDatabase) {
     if (urlDatabase[key].userID === id) {
       subDatabase[key] = urlDatabase[key];
@@ -61,7 +65,6 @@ function urlsForUser(id) {
 // At root directory
 app.get('/', (req, res) => {
   // if user is not logged in, redirect to login page
-  console.log(req.session)
   if (req.session.user_id === undefined) {
     res.redirect("http://localhost:8080/login");
   }
@@ -74,14 +77,6 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
-
-// app.get("/urls.json", (req, res) => {
-//   res.json(urlDatabase);
-// })
-
-// app.get("/hello", (req, res) => {
-//   res.end("<html><body> Hello <b>World</b></body></html>\n");
-// })
 
 app.get("/urls", (req, res) => {
   // if not logged in, return status code 401 response and link to /login
@@ -100,7 +95,6 @@ app.get("/urls", (req, res) => {
       user: req.session.user_id,
       users: users
       };
-      console.log(users)
     res.render("urls_index", templateVars);
   }
 });
@@ -139,7 +133,7 @@ app.post("/urls", (req, res) => {
 });
 
 app.post("/urls/:id", (req, res) => {
-  shortURLList = Object.keys(urlDatabase);
+  let shortURLList = Object.keys(urlDatabase);
   // if short URL as provided in :id does not exit,
   // return 404 and error message
   if (shortURLList.indexOf(req.params.id) === -1) {
@@ -165,7 +159,7 @@ app.post("/urls/:id", (req, res) => {
 })
 
 app.get("/urls/:id", (req, res) => {
-  shortURLList = Object.keys(urlDatabase);
+  let shortURLList = Object.keys(urlDatabase);
   // if short URL as provided in :id does not exit,
   // return 404 and error message
   if (shortURLList.indexOf(req.params.id) === -1) {
@@ -255,7 +249,7 @@ app.post("/login", (req, res) => {
   else {
     // if password does not match, return 401
     // note the password must be decrypted
-    if (bcrypt.compareSync(users[objKeys[index]].hashed_password, req.body.password)) {
+    if (! bcrypt.compareSync(req.body.password, users[objKeys[index]].hashed_password)) {
       res.status(401);
       res.send(`${res.statusCode}: password does not match.`);
     } else {
@@ -312,9 +306,9 @@ app.post("/register", (req, res) => {
 
 // function to generate random string for user ID and short URL
 function generateRandomString() {
-  var text = "";
-  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  for( var i=0; i < 6; i++ )
+  let text = "";
+  const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  for( let i=0; i < 6; i++ )
     text += possible.charAt(Math.floor(Math.random() * possible.length));
   return text;
 }
