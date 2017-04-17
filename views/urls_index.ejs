@@ -12,6 +12,8 @@
               <a href=<%= `http://localhost:8080/u/${url}` %> target="_blank"><%= url %></a> - <%= urls[url].url %>
               <a href=<%= `http://localhost:8080/urls/${url}` %>>Edit</a>
               <button type = "submit" value = "Submit"> Delete </button>
+              <br>
+              <%=`Date Created: ${urls[url].dateCreated} - Number of Visit: ${urls[url].numVisit} - Number of unique visitors: ${urls[url].uniqueVisitors.length}`%>
             </form>
           </li>
         <% }; %>

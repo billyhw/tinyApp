@@ -16,6 +16,8 @@
           <button type="submit" value="Submit"> Delete </button>
         </form>
       <a href="http://localhost:8080/urls/new"> Add new URL here </a>
+      <br>
+      <h3> URL Created Date: </h3> <%= urls[shortURL].dateCreated %>
       <h3> URL Statistics: </h3>
       <ul>
         <li> Number of Visits: <%= urls[shortURL].numVisit %> </li>

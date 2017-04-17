@@ -26,20 +26,23 @@ app.use(cookieSession({
 }))
 
 // hardcoded database
+// date created is set as now whenever server starts.
 let urlDatabase = {
   'b2xVn2': {
       url: 'www.lighthouselabs.ca',
       userID: 'userRandomID',
       numVisit: 0,
       uniqueVisitors: [],
-      visitHistory: []
+      visitHistory: [],
+      dateCreated: Date()
     },
   '9sm5xK': {
     url: 'www.google.com',
     userID: 'user2RandomID',
     numVisit: 0,
     uniqueVisitors: [],
-    visitHistory: []
+    visitHistory: [],
+    dateCreated: Date()
   }
 };
 
@@ -137,6 +140,7 @@ app.post("/urls", (req, res) => {
     urlDatabase[shortURL].numVisit = 0;
     urlDatabase[shortURL].uniqueVisitors = [];
     urlDatabase[shortURL].visitHistory = [];
+    urlDatabase[shortURL].dateCreated = Date();
     res.redirect(`http://localhost:8080/urls/${shortURL}`);
   }
 });
@@ -187,6 +191,8 @@ app.get("/urls/:id", (req, res) => {
     res.send(`${res.statusCode}: you do not have access to this short URL.`)
   }
   // if all is well, return 200 and the update form
+  // also display
+  // <stretch> date created, number of visits, number of unique visitors and visit history </stretch>
   else {
     let templateVars = {
       shortURL: req.params.id,
@@ -205,7 +211,7 @@ app.get("/u/:shortURL", (req, res) => {
     res.status(404);
     res.send(`${res.statusCode}: short URL does not exist.`);
   }
-  // if short URL exists, redirect to the long URL
+  // if short URL exists, redirect to the long URL, and update visit statistics and history
   else {
     let longURL = urlDatabase[req.params.shortURL].url;
     urlDatabase[req.params.shortURL].numVisit +=  1;
