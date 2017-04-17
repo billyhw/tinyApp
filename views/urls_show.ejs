@@ -5,7 +5,7 @@
   </head>
   <body>
     <% include partials/_header %>
-      <h3> <%= `Update link for short URL: ${shortURL}` %> </h3>
+      <h3> <%= `Update link for short URL: ${shortURL}` %></h3>
         <form method="POST" action = <%= `/urls/${shortURL}?_method=PUT` %>>
           <label for="longURL"><%= `Update ${urls[shortURL].url}:` %></label>
           <br>
@@ -16,5 +16,18 @@
           <button type="submit" value="Submit"> Delete </button>
         </form>
       <a href="http://localhost:8080/urls/new"> Add new URL here </a>
+      <h3> URL Statistics: </h3>
+      <ul>
+        <li> Number of Visits: <%= urls[shortURL].numVisit %> </li>
+        <li> Number of unique visitors: <%= urls[shortURL].uniqueVisitors.length %> </li>
+      </ul>
+      <h3> URL Visit History: </h3>
+      <ul>
+        <% for (var i in urls[shortURL].visitHistory) { %>
+          <li>
+            <%= `User: ${urls[shortURL].visitHistory[i].user} --- Date: ${urls[shortURL].visitHistory[i].time}` %>
+          </li>
+        <% }; %>
+     </ul>
     </body>
 </html>

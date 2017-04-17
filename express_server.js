@@ -29,11 +29,17 @@ app.use(cookieSession({
 let urlDatabase = {
   'b2xVn2': {
       url: 'www.lighthouselabs.ca',
-      userID: 'userRandomID'
+      userID: 'userRandomID',
+      numVisit: 0,
+      uniqueVisitors: [],
+      visitHistory: []
     },
   '9sm5xK': {
     url: 'www.google.com',
-    userID: 'user2RandomID'
+    userID: 'user2RandomID',
+    numVisit: 0,
+    uniqueVisitors: [],
+    visitHistory: []
   }
 };
 
@@ -49,7 +55,7 @@ const users = {
     email: "user2@examle.com",
     hashed_password: bcrypt.hashSync("dishwasher-funk",10)
   }
-}
+};
 
 // function to find user-specific short urls
 function urlsForUser(id) {
@@ -60,7 +66,7 @@ function urlsForUser(id) {
     }
   }
   return subDatabase;
-}
+};
 
 // At root directory
 app.get('/', (req, res) => {
@@ -128,6 +134,9 @@ app.post("/urls", (req, res) => {
     urlDatabase[shortURL] = {};
     urlDatabase[shortURL].url = req.body.longURL;
     urlDatabase[shortURL].userID = req.session.user_id;
+    urlDatabase[shortURL].numVisit = 0;
+    urlDatabase[shortURL].uniqueVisitors = [];
+    urlDatabase[shortURL].visitHistory = [];
     res.redirect(`http://localhost:8080/urls/${shortURL}`);
   }
 });
@@ -156,7 +165,7 @@ app.post("/urls/:id", (req, res) => {
     urlDatabase[req.params.id].url = req.body.longURL;
     res.redirect(`http://localhost:8080/urls/${req.params.id}`);
   }
-})
+});
 
 app.get("/urls/:id", (req, res) => {
   let shortURLList = Object.keys(urlDatabase);
@@ -187,7 +196,7 @@ app.get("/urls/:id", (req, res) => {
       };
     res.render("urls_show", templateVars);
   }
-})
+});
 
 // redirect to the short URL link
 app.get("/u/:shortURL", (req, res) => {
@@ -199,9 +208,17 @@ app.get("/u/:shortURL", (req, res) => {
   // if short URL exists, redirect to the long URL
   else {
     let longURL = urlDatabase[req.params.shortURL].url;
+    urlDatabase[req.params.shortURL].numVisit +=  1;
+    if (urlDatabase[req.params.shortURL].uniqueVisitors.indexOf(req.session.user_id) === -1) {
+      urlDatabase[req.params.shortURL].uniqueVisitors.push(req.session.user_id);
+    }
+    urlDatabase[req.params.shortURL].visitHistory.push({
+      user: req.session.user_id,
+      time: Date()
+    });
     res.redirect(`http://${longURL}`);
   }
-})
+});
 
 // delete a url
 app.delete("/urls/:id", (req, res) => {
@@ -210,7 +227,7 @@ app.delete("/urls/:id", (req, res) => {
     delete urlDatabase[req.params.id];
   }
   res.redirect(`http://localhost:8080/urls`);
-})
+});
 
 // update a url
 app.put("/urls/:id", (req, res) => {
@@ -219,7 +236,7 @@ app.put("/urls/:id", (req, res) => {
     urlDatabase[req.params.id].url = req.body.longURL;
   }
   res.redirect(`http://localhost:8080/urls`);
-})
+});
 
 app.get("/login", (req, res) => {
   // if not logged in, return 200 and move to login page
@@ -265,7 +282,7 @@ app.post("/logout", (req, res) => {
   // clear the cookie
   req.session = null;
   res.redirect("http://localhost:8080/")
-})
+});
 
 app.get("/register", (req, res) => {
   // if not logged in, return 200 and move to register page
@@ -280,7 +297,7 @@ app.get("/register", (req, res) => {
     // if already logged in, move to root
     res.redirect("http://localhost:8080/");
   }
-})
+});
 
 app.post("/register", (req, res) => {
   // if email or password not provided, return 400 and error message
@@ -311,4 +328,4 @@ function generateRandomString() {
   for( let i=0; i < 6; i++ )
     text += possible.charAt(Math.floor(Math.random() * possible.length));
   return text;
-}
+};
